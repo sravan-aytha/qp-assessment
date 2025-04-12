@@ -1,0 +1,32 @@
+{
+  "name": "qp-assessment",
+  "version": "1.0.0",
+  "description": "A groccery api where admin can manage the grocery and user can order multiple orders",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild src/**/*.ts --bundle --outdir=build/src --platform=node --target=node18 --tsconfig=tsconfig.json --log-level=silent",
+    "server": "npm run build && node ./build/src/index.js"
+  },
+  "keywords": [
+    "groccery",
+    "api"
+  ],
+  "author": "sravan",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "esbuild": "^0.25.2",
+    "express": "^5.1.0",
+    "md5": "^2.3.0",
+    "mysql2": "^3.14.0",
+    "nodemon": "^3.1.9",
+    "randomstring": "^1.3.1",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.1",
+    "ts-node": "^10.9.2"
+  }
+}
