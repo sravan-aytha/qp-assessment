@@ -65,16 +65,28 @@ class GroceryRepository{
         }
     }
 
-    public async deleteGroceryItem(){
 
+    public async getAllGroceryItems():Promise<any>{
+        try{
+            const query = `SELECT * from groceries`
+            const result = await this._baseRepository.execute(query)
+            // console.log(result)
+            return result
+        }catch(e){
+            throw e
+        }
     }
 
-    public async getAllGroceryItems(){
-
-    }
-
-    public async getGroceryItemById(){
-
+    public async getGroceryItemById(id:string){
+        try{
+            const query = `SELECT * from groceries WHERE id = ?`
+            const values=[id]
+            const result = await this._baseRepository.execute(query,values)
+            console.log(result)
+            return result
+        }catch(e){
+            throw e
+        }
     }
 
     public async getGroceryItemByName(name:string):Promise<any>{
@@ -89,6 +101,69 @@ class GroceryRepository{
         }
     }
 
+    public async updateGroceryQuantity(id:string,quantity:number):Promise<any>{
+        try{
+            const query = `UPDATE groceries SET quantity = ? WHERE id =?`
+            const values =[quantity,id]
+            const result = await this._baseRepository.execute(query,values)
+            return true
+        }catch(e){
+            throw e
+        }
+    }
+
+    public async updateGroceryDetails({id,name,description,price,category}:{
+        id:string,
+        name?:string,
+        description?:string,
+        price?:number,
+        category?:number
+    }){
+        try{
+
+            const query =['UPDATE groceries']
+            const fields=[]
+            const values=[]
+            query.push("SET")
+            if(name){
+                fields.push("name=?")
+                values.push(name)
+            }
+            if(description){
+                fields.push("description=?")
+                values.push(description)
+            }
+            if(price || (price && price==0)){
+                fields.push("price=?")
+                values.push(price)
+            }
+            if(category || (category && category==0)){
+                fields.push("category =?")
+                values.push(category)
+            }
+            query.push(fields.join(','))
+            query.push("WHERE id=?")
+            values.push(id)
+            
+            const finalQuery = query.join(" ")
+            console.log(finalQuery)
+            const result = await this._baseRepository.execute(finalQuery,values)
+            return true
+        }catch(e){
+            throw e
+        }
+    }
+    
+    public async deleteGroceryItem(id:string){
+        try {
+            const query = `DELETE FROM groceries WHERE id=?`
+            const values =[id]
+            const result = await this._baseRepository.execute(query,values)
+            return true
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 export default GroceryRepository

@@ -5,7 +5,11 @@ const router = Router()
 export const createGroceryRouter = (controller:GroceryController)=>{
     const router = Router()
 
-    router.use('/addItem',controller.addGroceryItem)
+    router.post('/addItem',controller.addGroceryItem)
+    router.get('/getGroceries',controller.getGroceryItems)
+    router.get('/updateGroceryQuantity',controller.updateGroceryItemQuantity)
+    router.get('/updateGroceryDetails',controller.updateGroceryDetails)
+    router.get('/deleteGroceryItem',controller.deleteGroceryItem)
 
     return router
 }

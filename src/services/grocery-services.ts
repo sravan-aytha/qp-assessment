@@ -1,4 +1,4 @@
-import { GROCERY_CATEGORY, TGrocery } from "../models/grocery-model";
+import { GROCERY_CATEGORY, GROCERY_QUANTITY_UPDATE_TYPE, TGrocery } from "../models/grocery-model";
 import GroceryRepository from "../repositories/grocery-repository";
 import { GroceryUtils } from "../utilities/grocery-utility";
 
@@ -61,9 +61,111 @@ class GroceryService{
         }
         return []
     }
-    
-    public async deleteGroceryItem(){
 
+    public async getAllGroceryitems():Promise<Array<TGrocery>>{
+        try{
+            const result = <Array<any>>await this._groceryRepository.getAllGroceryItems()
+            const groceryList:Array<TGrocery>=[]
+            result.forEach((item)=>{
+                groceryList.push({
+                    id: item.id,
+                    name: item.name,
+                    quantity: item.quantity,
+                    description: item.description,
+                    price: item.price,
+                    category: item.category
+                })
+            })
+            return groceryList
+        }catch(e){
+            console.log(e)
+            return []
+        }
+    }
+
+    public async updateGroceryQuantity(id:string,quantityUpdateType:GROCERY_QUANTITY_UPDATE_TYPE,quantity:number){
+        const currentGrocery = (<Array<any>>await this._groceryRepository.getGroceryItemById(id))[0]
+        if(!currentGrocery){
+            return {
+                success:false,
+                code:601 // no grocery item with that
+            }
+        }
+        let currentquantity = currentGrocery.quantity
+        if(quantityUpdateType==GROCERY_QUANTITY_UPDATE_TYPE.DECREMENT && (currentquantity-quantity) < 0){
+            return {
+                success:false,
+                code:602 // more quntity reduce than available hypothetical
+            }
+        }
+        if(quantityUpdateType == GROCERY_QUANTITY_UPDATE_TYPE.INCREMENT){
+            currentquantity+=quantity
+        }else if (quantityUpdateType == GROCERY_QUANTITY_UPDATE_TYPE.DECREMENT){
+            currentquantity-=quantity
+        }
+        const result = await this._groceryRepository.updateGroceryQuantity(id,currentquantity)
+        if(result){
+            return {
+                success:true
+            }
+        }
+
+        return {success:false}
+    }
+    public async updateGroceryDetails({id,name,description,price,category}:{
+        id:string,
+        name?:string,
+        description?:string,
+        price?:number,
+        category?:number
+    }){
+        try {
+            const currentGrocery = (<Array<any>>await this._groceryRepository.getGroceryItemById(id))[0]
+            if(!currentGrocery){
+                return {
+                    success:false,
+                    code:601 // no grocery item with that
+                }
+            }
+            const result = await this._groceryRepository.updateGroceryDetails({
+                id:id,
+                name:name,
+                description:description,
+                price:price,
+                category:category
+            })
+            if(result){
+                return {
+                    success:true
+                }
+            }
+            return{success:false}
+            
+        } catch (error) {
+            console.log(error)
+            return {success:false}
+        }
+    }
+
+    public async deleteGroceryItem(id:string){
+        try {
+            const currentGrocery = (<Array<any>>await this._groceryRepository.getGroceryItemById(id))[0]
+            if(!currentGrocery){
+                return {
+                    success:false,
+                    code:601 // no grocery item with that
+                }
+            }
+            const deleteResult =await this._groceryRepository.deleteGroceryItem(id)
+            if(deleteResult){
+                return {success:true}
+            }
+            return {success:false}
+            
+        } catch (error) {
+         console.log(error)
+         return {success:false}   
+        }
     }
 }
 
