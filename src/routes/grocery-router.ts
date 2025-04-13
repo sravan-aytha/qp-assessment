@@ -1,5 +1,5 @@
 import { Router } from "express";
-import GroceryController from "../controllers/groceryController";
+import GroceryController from "../controllers/grocery-controller";
 const router = Router()
 
 export const createGroceryRouter = (controller:GroceryController)=>{
