@@ -1,11 +1,11 @@
 import UserRepository from "repositories/user-repositoy"
 import GroceryController from "controllers/grocery-controller"
+import UserController from "controllers/user-controller"
 import Database from "database/database"
 import BaseRepository from "repositories/base-repository"
 import GroceryRepository from "repositories/grocery-repository"
 import GroceryService from "services/grocery-services"
 import Userservice from "services/user-service"
-import UserController from "controllers/user-controller"
 import { createGroceryRouter } from "routers/grocery-router"
 import { createUserRouter } from "routers/user-router"
 
@@ -21,7 +21,7 @@ export const startup = async()=>{
     const userService = new Userservice(userRepository)
 
     const groceryController = new GroceryController(groceryService)
-    const userController = new UserController()
+    const userController = new UserController(userService)
 
     const groceryRouter = createGroceryRouter(groceryController)
     const userRouter = createUserRouter(userController)
