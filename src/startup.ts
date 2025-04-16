@@ -8,6 +8,7 @@ import GroceryService from "services/grocery-services"
 import Userservice from "services/user-service"
 import { createGroceryRouter } from "routers/grocery-router"
 import { createUserRouter } from "routers/user-router"
+import AuthController from "controllers/authcontroller"
 
 export const startup = async()=>{
     const dbConnection  = await new Database().getInstance()
@@ -21,10 +22,12 @@ export const startup = async()=>{
     const userService = new Userservice(userRepository)
 
     const groceryController = new GroceryController(groceryService)
-    const userController = new UserController(userService)
+    const authController  = new AuthController()
+    const userController = new UserController(userService,authController)
 
-    const groceryRouter = createGroceryRouter(groceryController)
-    const userRouter = createUserRouter(userController)
+    
+    const groceryRouter = createGroceryRouter(groceryController,authController)
+    const userRouter = createUserRouter(userController,authController)
 
     // need to change as the di class
     return {

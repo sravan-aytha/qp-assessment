@@ -1,3 +1,4 @@
+import { TResponse } from "src/models/general-model";
 import { GROCERY_CATEGORY, GROCERY_QUANTITY_UPDATE_TYPE, TGrocery } from "../models/grocery-model";
 import GroceryRepository from "../repositories/grocery-repository";
 import { GroceryUtils } from "../utilities/grocery-utility";
@@ -83,34 +84,91 @@ class GroceryService{
         }
     }
 
-    public async updateGroceryQuantity(id:string,quantityUpdateType:GROCERY_QUANTITY_UPDATE_TYPE,quantity:number){
-        const currentGrocery = (<Array<any>>await this._groceryRepository.getGroceryItemById(id))[0]
-        if(!currentGrocery){
+    public async getGroceriesByIds(ids:Array<string>):Promise<TResponse>{
+        try {
+            const result = <Array<any>>await this._groceryRepository.getGroceriesByIds(ids)
+            let groceries:Array<TGrocery>=[]
+            result.forEach((gro)=>{
+                groceries.push({
+                    id: gro.id,
+                    name: gro.name,
+                    quantity: gro.quantity,
+                    description: gro.description,
+                    price: gro.price,
+                    category: gro.category
+                })
+            })
+            return {success:true,data:groceries}
+        } catch (error) {
+            console.log(error)
             return {
-                success:false,
-                code:601 // no grocery item with that
+                success:false
             }
         }
-        let currentquantity = currentGrocery.quantity
-        if(quantityUpdateType==GROCERY_QUANTITY_UPDATE_TYPE.DECREMENT && (currentquantity-quantity) < 0){
-            return {
-                success:false,
-                code:602 // more quntity reduce than available hypothetical
-            }
-        }
-        if(quantityUpdateType == GROCERY_QUANTITY_UPDATE_TYPE.INCREMENT){
-            currentquantity+=quantity
-        }else if (quantityUpdateType == GROCERY_QUANTITY_UPDATE_TYPE.DECREMENT){
-            currentquantity-=quantity
-        }
-        const result = await this._groceryRepository.updateGroceryQuantity(id,currentquantity)
-        if(result){
-            return {
-                success:true
-            }
-        }
+    }
 
+    public async updateGroceryQuantity(updateObjs:Array<{id:string,updateType:GROCERY_QUANTITY_UPDATE_TYPE,quantity:number}>):Promise<TResponse>{
+
+        let groceryIds:Array<string> = []
+
+        updateObjs.forEach((up)=>{
+            groceryIds.push(up.id)
+        })
+
+        const getAllGroceryObjInUpdatesResp = await this.getGroceriesByIds(groceryIds)
+        if(!getAllGroceryObjInUpdatesResp.success){
+            return {success:false}
+        }
+        const allGroceryObjInUpdates=<Array<TGrocery>>getAllGroceryObjInUpdatesResp.data
+        if(allGroceryObjInUpdates.length !== groceryIds.length){
+            return{
+                success:false,
+                code:601
+            }
+        }
+        let groceryMap = new Map<string,TGrocery>()
+        allGroceryObjInUpdates.forEach((gro)=>{
+            groceryMap.set(gro.id,gro)
+        })
+        console.log("-----",updateObjs)
+        let finalUpdate:Array<{id:string,quantity:number}>=[]
+        for(let i=0;i<updateObjs.length;i++){
+            let currUpdate = updateObjs[i]
+            if(currUpdate.updateType==GROCERY_QUANTITY_UPDATE_TYPE.DECREMENT){
+                let curGrocery = groceryMap.get(currUpdate.id)
+                if(curGrocery){
+                    if((curGrocery.quantity-currUpdate.quantity)<0){
+                        return {
+                            success:false,
+                            code:602
+                        }
+                    }
+                    curGrocery.quantity-=currUpdate.quantity
+                    finalUpdate.push({
+                        id:curGrocery.id,
+                        quantity:curGrocery.quantity
+                    })
+                }
+            }else if(currUpdate.updateType == GROCERY_QUANTITY_UPDATE_TYPE.INCREMENT){
+                let curGrocery = groceryMap.get(currUpdate.id)
+                if(curGrocery){
+                    curGrocery.quantity+=currUpdate.quantity
+                    finalUpdate.push({
+                        id:curGrocery.id,
+                        quantity:curGrocery.quantity
+                    })
+                }
+            }
+        }
+        console.log("final updates",finalUpdate)
+       
+        const result = await this._groceryRepository.updateGroceryQuantity(finalUpdate)
+        if(result){
+
+            return {success:true}
+        }
         return {success:false}
+   
     }
     public async updateGroceryDetails({id,name,description,price,category}:{
         id:string,

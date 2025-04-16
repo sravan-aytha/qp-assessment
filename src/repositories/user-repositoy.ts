@@ -96,6 +96,17 @@ class UserRepository{
         }
     }
 
+    public async getUserByPhoneandPassword(phone:string,password:string){
+        try {
+            const query =`SELECT * from users WHERE phone=? AND password=? LIMIT 1`
+            const values = [phone,password]
+            const result = await this._baseRepository.execute(query,values)
+            return result
+        } catch (error) {
+            throw error
+        }
+    }
+
     public async updateUserName(id:string,name:string){
         try {
             const query = `UPDATE users SET name = ? WHERE id = ?`

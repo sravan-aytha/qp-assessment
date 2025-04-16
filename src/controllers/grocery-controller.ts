@@ -1,3 +1,4 @@
+import { GROCERY_QUANTITY_UPDATE_TYPE } from "src/models/grocery-model";
 import GroceryService from "../services/grocery-services";
 
 class GroceryController{
@@ -65,21 +66,21 @@ class GroceryController{
 
     updateGroceryItemQuantity = async(request:any,response:any)=>{
         try{
-            const {id,updateType,quantity} = request.body
-            const result = await this._GroceryService.updateGroceryQuantity(id,updateType,quantity)
+            const updateInfoArr = request.body.updates
+            const result = await this._GroceryService.updateGroceryQuantity(updateInfoArr)
             if(!result.success){
 
                 if(!result.success && result.code==601){
                     response.json({
                         success:false,
-                        error:"unable to find the grocery item, please check again"
+                        error:"unable to find the some or all of the grocery item, please check again"
                     })
                     return;
                 }
                 else if(!result.success && result.code == 602){
                     response.json({
                         success:false,
-                        error:"invalid opertaion, trying to reduce more than available"
+                        error:"invalid opertaion, trying to reduce more than available in any grocery item, please check again"
                     })
                     return;
                 }else{

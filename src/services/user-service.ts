@@ -1,3 +1,4 @@
+import { exit } from "process";
 import UserRepository from "repositories/user-repositoy";
 import { TResponse } from "src/models/general-model";
 import { TUser, USER_ROLES } from "src/models/user-model";
@@ -125,6 +126,32 @@ class UserService{
         }catch(err){
             console.log(err)
             return {
+                success:false
+            }
+        }
+    }
+
+    public async getUserByPhoneAndPassword(phone:string,password:string):Promise<TResponse>{
+        let hashedPassword = await getHashedUserPassword(password)
+        const result = <Array<any>>await this._userRepository.getUserByPhoneandPassword(phone,hashedPassword)
+        let users:Array<TUser>=[]
+        result.forEach((usr)=>{
+            users.push({
+                id: usr.id,
+                name: usr.name,
+                phone: usr.phone,
+                password: usr.password,
+                role:usr.role
+            })
+        })
+        if(result[0]){
+
+            return {
+                success:true,
+                data:result[0]
+            }
+        }else{
+            return{
                 success:false
             }
         }

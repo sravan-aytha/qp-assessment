@@ -101,10 +101,32 @@ class GroceryRepository{
         }
     }
 
-    public async updateGroceryQuantity(id:string,quantity:number):Promise<any>{
+    public async getGroceriesByIds(ids:Array<string>){
         try{
-            const query = `UPDATE groceries SET quantity = ? WHERE id =?`
-            const values =[quantity,id]
+            const placeholders = ids.map(() => '?').join(', ');
+            const query = `SELECT * from groceries WHERE id IN (${placeholders})`
+            const values =ids
+            const result = await this._baseRepository.execute(query,values)
+            return result
+        }catch(e){
+            throw e
+        }
+    }
+    public async updateGroceryQuantity(updateInfos:Array<{id:string,quantity:number}>):Promise<any>{
+        try{
+            const ids = updateInfos.map(row=>row.id)
+            const caseStatements = updateInfos.map(() => 'WHEN ? THEN ?').join(' ');
+            const query = `
+                        UPDATE groceries
+                        SET quantity = CASE id
+                            ${caseStatements}
+                        END
+                        WHERE id IN (${ids.map(() => '?').join(', ')})
+                        `;
+
+            const values = updateInfos.flatMap(({ id, quantity }) => [id, quantity]).concat(ids);
+
+            
             const result = await this._baseRepository.execute(query,values)
             return true
         }catch(e){
