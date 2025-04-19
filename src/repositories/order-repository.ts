@@ -19,11 +19,11 @@ class OrderRepository{
                 const createTableRes = await this.createOrderTable(query)
                 /*@ts-ignore*/
             if(createTableRes?.warningStatus == 0){
-                console.log(` Grocery table not found ..... \n Grocery table created`)
+                console.log(` orders table not found ..... \n orders table created`)
             }
             /*@ts-ignore*/
             else if(createTableRes?.warningStatus == 1){
-                console.log(` Grocery table found.... \n skipping table creation`)
+                console.log(` orders table found.... \n skipping table creation`)
             }
         })()
     }
