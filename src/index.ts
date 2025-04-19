@@ -12,11 +12,11 @@ dotenv.config();
     
     middleware(app)
 
-    const {groceryRouter,userRouter} = await startup()
+    const {groceryRouter,userRouter,orderRouter} = await startup()
     
     app.use('/grocery',groceryRouter)
     app.use('/user',userRouter)
-    
+    app.use('/order',orderRouter)
     app.listen(port,async ()=>{
         console.log(`server listening at port ${port}`)
     })
