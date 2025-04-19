@@ -1,0 +1,37 @@
+# Use Node.js 16 on Ubuntu as base image
+FROM ubuntu:20.04
+
+# Avoid prompts from apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install essentials and Node.js 16
+RUN apt-get update && \
+    apt-get install -y tzdata curl gnupg && \
+    ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs build-essential
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Debug: List the current directory contents
+RUN echo "Listing build context root:" && ls -la
+
+# Copy package files first (for better caching)
+COPY package*.json ./
+
+# Debug: Verify package.json exists
+RUN echo "Checking for package.json:" && ls -la
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of your application
+COPY . .
+
+# Expose the port your app runs on
+EXPOSE 3000
+
+# Command to run the application
+CMD ["npm", "run", "server"]
