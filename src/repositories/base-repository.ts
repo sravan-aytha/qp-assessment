@@ -12,7 +12,7 @@ class BaseRepository{
             return rows
         }catch(error){
             console.log("error while executing query in database")
-            return []
+            throw error
         }
     }
 }
